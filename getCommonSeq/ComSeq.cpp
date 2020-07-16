@@ -805,47 +805,46 @@ void ComSeq::PreAttributeCluster()
     mat U;
     vec s;
     mat V;
+    mat Kernal;
     std::vector<double> ComponentDistribution;
 
 
 
+   if( Sample.n_rows < Sample.n_cols)
+   {
 
+      svd_econ(U,s,V,Sample);
+      for(int i=0;i<s.n_elem;i++)
+      {
+         AC = AC+s[i]*s[i];
+      }
 
-    svd_econ(U,s,V,Sample);
-
-    for(int i=0;i<s.n_elem;i++)
-    {
-       AC = AC+s[i]*s[i];
-    }
-
-    for(int i=0;i<s.n_elem;i++)
-    {
-       PC = PC+s[i]*s[i];
-       Rank ++;
-       if(PC>((1.0-tolerance)*AC))
-       {
+      for(int i=0;i<s.n_elem;i++)
+      {
+         PC = PC+s[i]*s[i];
+         Rank ++;
+         if(PC>((1.0-tolerance)*AC))
+         {
            break;
-       }
-    }
-    printf("Rank: %d\n",Rank);
-
-  //  U.resize(U.n_rows,Rank);
-    //cor= Sample.t()*U;
-    cor.resize(Sample.n_cols,Rank);
+         }
+      }
 
 
-    for(int j=0;j< cor.n_cols;j++)
-    {
+      cor.resize(Sample.n_cols,Rank);
+
+
+      for(int j=0;j< cor.n_cols;j++)
+      {
            for(int i=0;i< cor.n_rows;i++)
            {
               cor(i,j) = V(i,j)*s[j];
            }
-    }
+      }
 
-    for(int j=0;j< cor.n_cols;j++)
-    {
-      for(int i=0;i< cor.n_rows;i++)
-      {
+     for(int j=0;j< cor.n_cols;j++)
+     {
+       for(int i=0;i< cor.n_rows;i++)
+       {
              if(Correlation_Matrix[1,i]==0)
              {
                 cor(i,j) =0;
@@ -854,8 +853,74 @@ void ComSeq::PreAttributeCluster()
              {
                 cor(i,j) = cor(i,j)/sqrt(Correlation_Matrix[1,i]);
              }
+       }
+     }
+
+
+
+
+
+   }else
+   {
+       //Kernal = Sample.t()*Sample;
+
+       sp_mat SampleS = sp_mat(Sample);
+
+       Kernal = mat(SampleS.t()*SampleS);
+       SampleS.resize(0,0);
+
+       eig_sym(s,V,Kernal);
+       for(int i=0;i<s.n_elem;i++)
+       {
+          AC = AC+s[i];
+       }
+
+       for(int i=s.n_elem-1;i>=0;i--)
+       {
+        PC = PC+s[i];
+        Rank ++;
+
+        if(PC>((1.0-tolerance)*AC))
+        {
+           break;
+        }
+       }
+
+      cor.resize(Sample.n_cols,Rank);
+
+
+      for(int j=0;j< cor.n_cols;j++)
+      {
+           for(int i=0;i< cor.n_rows;i++)
+           {
+              cor(i,j) = V(i,s.n_elem-1-j)*sqrt(s[s.n_elem-1-j]);
+           }
       }
-    }
+
+      for(int j=0;j< cor.n_cols;j++)
+      {
+         for(int i=0;i< cor.n_rows;i++)
+         {
+             if(Correlation_Matrix[1,i]==0)
+             {
+                cor(i,j) =0;
+             }
+             else
+             {
+                cor(i,j) = cor(i,j)/sqrt(Correlation_Matrix[1,i]);
+             }
+         }
+      }
+   }
+
+
+
+
+      printf("Rank: %d\n",Rank);
+
+  //  U.resize(U.n_rows,Rank);
+    //cor= Sample.t()*U;
+
 
 
     ResultIDArray.resize(2*Rank);
@@ -1132,7 +1197,9 @@ void ComSeq::PreAttributeCluster()
                      Group1Square  = Group1Square + data(0,k)*data(0,k);
                      Group2Average = NegativeGroupAverage - Group1Average;
                      Group2Square  = NegativeGroupSquare - Group1Square;
-                     SqrtAverage =  (Group1Square-Group1Average*Group1Average/((k+1)*1.0))*((k+1)*1.0) + (Group2Square-Group2Average*Group2Average/((GroupSize-k)*1.0));
+                     SqrtAverage =(Group1Square-Group1Average*Group1Average/((k+1)*1.0))*((k+1)*1.0) + (Group2Square-(Group2Average*Group2Average/((GroupSize-k)*1.0)))*(GroupSize-k);
+
+
 
                       if(SqrtAverage < MinSqrtAverage)
                       {
@@ -1956,7 +2023,7 @@ void ComSeq::OutClusterWithNameCombact(FILE * op)
                     fprintf(op,"%lf ",(CorrSum-clusterResult[i].PatternIDs.size())/((clusterResult[i].PatternIDs.size()-1)*(clusterResult[i].PatternIDs.size())));
                 else
 		    fprintf(op,"%lf ",1.0);
-			 
+
                /* double InterCor1=0;
                 for(int j=0;j<cor.n_cols;j++)
                 {
