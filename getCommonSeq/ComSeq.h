@@ -319,6 +319,10 @@ class ClusterToFeature{
   void ReadNetWork(FILE *ip);
   void NetWorkKernal();
   void OutPutNetWorkKernalM(FILE * op);
+  void SampleWrite(FILE*op);
+  void Normalized();
+  void Log();
+	
   sp_mat Out;
   mat U;
   mat V;
