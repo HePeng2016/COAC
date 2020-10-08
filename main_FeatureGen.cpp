@@ -15,6 +15,7 @@ int main( int argc , char *argv[] )
           printf("FeatureGen Decipher\n");
           printf("FeatureGen Statistics\n");
           printf("FeatureGen CorStatistics\n");
+          printf("FeatureGen LogNormalized\n");
           return 0;
      }
 
@@ -163,6 +164,29 @@ int main( int argc , char *argv[] )
         }
      }
 
+     
+   if( strcmp(argv[1],"LogNormalized") ==0 )
+   {
+
+       FILE *ip = fopen(argv[2],"r"); 
+       FILE *op = fopen(argv[3],"w+");
+
+
+       if(ip==NULL||op==NULL||argc<3)
+       {
+	      printf("FeatureGen LogNormalized InputFile OutputFile\n");
+           return 0;
+       }
+
+       Test.SampleRead(ip); 
+       Test.Normalized();
+       Test.Log();
+       Test.SampleWrite(op);
+      
+   }
+     
+     
+     
       if( strcmp(argv[1],"CorStatistics")==0)
      {
         char buffer[1024];
