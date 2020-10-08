@@ -558,6 +558,66 @@ void   ClusterToFeature::NetWorkFilteFeature ()
 
 
 
+void ClusterToFeature::SampleWrite(FILE*op)
+{
+
+        for(int i=0;i<Sample.n_cols;i++)
+        {
+           fprintf(op,"%s\t",SampleName[i].c_str());
+        }
+           fprintf(op,"\n");
+
+       for(int j=0;j<Sample.n_rows;j++)
+       {
+          for(int i =0;i<Sample.n_cols;i++)
+          {
+            fprintf(op,"%lf\t",Sample(j,i));
+          }
+            fprintf(op,"\n");
+       }
+
+}
+
+void ClusterToFeature::Normalized()
+{
+         for(int j=0;j<Sample.n_rows;j++)
+         {
+             double sum =0;
+
+
+             for(int i =0;i<Sample.n_cols;i++)
+             {
+                sum = sum + Sample(j,i);
+             }
+                sum = sum/((double)(Sample.n_cols));
+
+             for(int i =0;i<Sample.n_cols;i++)
+             {
+                Sample(j,i) = Sample(j,i)/(sum+0.000001);
+             }
+
+         }
+}
+
+void ClusterToFeature::Log()
+{
+
+       for(int j=0;j<Sample.n_rows;j++)
+       {
+          for(int i =0;i<Sample.n_cols;i++)
+         {
+            Sample(j,i)=log(Sample(j,i)+1);
+         }
+     }
+}
+
+
+
+
+
+
+
+
 void  ClusterToFeature::ReadNetWork(FILE *ip)
 {
     std::string  IDPath;
