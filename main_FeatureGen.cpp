@@ -6,20 +6,23 @@ using namespace std;
 
 int main( int argc , char *argv[] )
 {
-
+          
      ClusterToFeature Test;
-
+          
      if(argv[1]==NULL)
-     {
+     {  
           printf("FeatureGen ToFeature\n");
           printf("FeatureGen Decipher\n");
           printf("FeatureGen Statistics\n");
           printf("FeatureGen CorStatistics\n");
-          printf("FeatureGen LogNormalized\n");
+          printf("FeatureGen  LogNormalized\n");
+          printf("FeatureGen FeatureFilter\n"); 
+          printf("FeatureGen FeatureToNetwork\n");
+         
           return 0;
-     }
-
-
+     } 
+    
+    
 
      if( strcmp(argv[1],"ToFeature")==0)
      {
@@ -59,6 +62,25 @@ int main( int argc , char *argv[] )
         Test.SampleDecipher(op);
 
      }
+      if( strcmp(argv[1],"FeatureFilter")==0)
+      {
+          FILE * ip =  fopen(argv[2],"r");
+          FILE * ip1 = fopen(argv[3],"r");
+          FILE * op =  fopen(argv[4],"w+");
+
+
+
+        if(ip==NULL||op==NULL||argc<4)
+        {
+          printf("FeatureGen FeatureFilter FeatureFile  KeptGenes OutputFile\n");     return 0;
+         }
+         Test.ReadFeature(ip);
+         Test.ReadFilteFile(ip1);
+         Test.FilteFeature();
+         Test.OutPutFeatureS(op);
+
+      }
+
 
      if( strcmp(argv[1],"FeatureToNetwork")==0)
      {
@@ -67,6 +89,10 @@ int main( int argc , char *argv[] )
         FILE * op =  fopen(argv[3],"w");
         FILE * op1 =  fopen(argv[4],"w");
         std::map < std::string ,int > GeneName;
+        if(ip==NULL||op==NULL||argc<4)
+        {
+             printf("FeatureGen FeatureToNetwork  FeatureFile  network1   network2\n");     return 0;
+        }
 
         Test.ReadFeature(ip);
         int NODESIZE =0;
@@ -77,9 +103,9 @@ int main( int argc , char *argv[] )
         }
 
         int NodeIndex =0;
-        for(int i=0;i< Test.FeatureM.size();i++)
+        for(int i=0;i< (Test.FeatureM.size()-1);i++)
         {
-          int geneID;
+           int geneID;
 
            for( int j=0;j<Test.FeatureNameArray[i].size();j++)
            {
@@ -87,7 +113,7 @@ int main( int argc , char *argv[] )
             if ( GeneName.find( Test.FeatureNameArray[i][j].c_str()) ==  GeneName.end() )
             {
 
-               GeneName.insert(std::make_pair(Test.FeatureNameArray[i][j].c_str(),GeneName.size()+ 1.0 + NODESIZE));
+               GeneName.insert(std::make_pair(Test.FeatureNameArray[i][j].c_str(),GeneName.size()+NODESIZE));
                geneID = GeneName[Test.FeatureNameArray[i][j].c_str()];
 
             }else
@@ -164,29 +190,6 @@ int main( int argc , char *argv[] )
         }
      }
 
-     
-   if( strcmp(argv[1],"LogNormalized") ==0 )
-   {
-
-       FILE *ip = fopen(argv[2],"r"); 
-       FILE *op = fopen(argv[3],"w+");
-
-
-       if(ip==NULL||op==NULL||argc<3)
-       {
-	      printf("FeatureGen LogNormalized InputFile OutputFile\n");
-           return 0;
-       }
-
-       Test.SampleRead(ip); 
-       Test.Normalized();
-       Test.Log();
-       Test.SampleWrite(op);
-      
-   }
-     
-     
-     
       if( strcmp(argv[1],"CorStatistics")==0)
      {
         char buffer[1024];
@@ -244,6 +247,26 @@ int main( int argc , char *argv[] )
        Test.NetWorkFilteFeature();
        Test.OutPutFeatureS(op);
     }
+
+   if( strcmp(argv[1],"LogNormalized") ==0 )
+   {
+
+       FILE *ip = fopen(argv[2],"r");
+       FILE *op = fopen(argv[3],"w+");
+
+
+       if(ip==NULL||op==NULL||argc<3)
+       {
+           printf("FeatureGen LogNormalized InputFile OutputFile\n");
+           return 0;
+       }
+
+       Test.SampleRead(ip);
+       Test.Normalized();
+       Test.Log();
+       Test.SampleWrite(op);
+
+   }
 /*
    if( strcmp(argv[1],"NetworkKernal") ==0)
    {
@@ -282,13 +305,5 @@ int main( int argc , char *argv[] )
 
        //to do
    }
-
-
-
-
    return 0;
 }
-
-
-
-
